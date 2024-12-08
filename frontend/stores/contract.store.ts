@@ -1,55 +1,12 @@
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import { useRuntimeConfig } from '#imports';
+
 export const useContractStore = defineStore('contractStore', () => {
-  const contracts = ref<Contract[]>([
-    {
-      id: 1,
-      title: 'Mobile Data Plan - Basic',
-      description: '5GB data plan with unlimited calls and texts.',
-      expiresAt: new Date('2025-06-01'),
-      lastTerminationDate: new Date('2025-05-15'),
-    },
-    {
-      id: 2,
-      title: 'Mobile Data Plan - Premium',
-      description: 'Unlimited data plan with international roaming.',
-      expiresAt: new Date('2026-01-11'),
-      lastTerminationDate: new Date('2025-12-15'),
-    },
-    {
-      id: 3,
-      title: 'Electricity Plan - Standard',
-      description: 'Standard residential electricity plan with fixed rate.',
-      expiresAt: new Date('2026-09-18'),
-      lastTerminationDate: new Date('2026-08-15'),
-    },
-    {
-      id: 4,
-      title: 'Electricity Plan - Green Energy',
-      description: '100% renewable energy plan with variable rate.',
-      expiresAt: new Date('2025-03-23'),
-      lastTerminationDate: new Date('2025-02-15'),
-    },
-    {
-      id: 5,
-      title: 'Health Insurance - Silver',
-      description: 'Basic health insurance plan with annual coverage.',
-      expiresAt: new Date('2024-12-30'),
-      lastTerminationDate: new Date('2024-11-15'),
-    },
-    {
-      id: 6,
-      title: 'Life Insurance - Term 3',
-      description: '3-year term life insurance with $250,000 coverage.',
-      expiresAt: new Date('2026-10-15'),
-      lastTerminationDate: new Date('2026-09-15'),
-    },
-    {
-      id: 7,
-      title: 'Home Insurance - Basic Coverage',
-      description: 'Basic coverage for home structure and contents.',
-      expiresAt: new Date('2025-08-01'),
-      lastTerminationDate: new Date('2025-07-15'),
-    },
-  ]);
+  const toast = useToast();
+  const config = useRuntimeConfig();
+  const baseUrl = `${config.public.apiBaseUrl}/contracts`;
+  const contracts = ref<Contract[]>([]);
 
   const groupedContracts = computed(() => {
     const groupedByYear = contracts.value.reduce(
@@ -64,26 +21,106 @@ export const useContractStore = defineStore('contractStore', () => {
       {} as Record<number, typeof contracts.value>,
     );
 
-    return Object.entries(groupedByYear).map(([year, contracts]) => ({
-      year: Number(year),
-      contracts,
-    }));
+    return Object.entries(groupedByYear)
+      .map(([year, contracts]) => ({
+        year: Number(year),
+        contracts: contracts.sort(
+          (a, b) => a.expiresAt.getTime() - b.expiresAt.getTime(),
+        ),
+      }))
+      .sort((a, b) => a.year - b.year);
   });
 
-  function createContract(contract: CreateContract) {
-    contracts.value.push({ id: Math.random(), ...contract });
+  function toContract(contract: ContractDto): Contract {
+    return {
+      ...contract,
+      expiresAt: new Date(contract.expiresAt),
+      lastTerminationDate: new Date(contract.lastTerminationDate),
+    };
   }
 
-  function editContract(contractId: number, contract: CreateContract) {
-    const index = contracts.value.findIndex(c => c.id === contractId);
-    contracts.value[index] = { ...contracts.value[index], ...contract };
+  async function fetchContracts() {
+    try {
+      const response = await fetch(baseUrl);
+      if (!response.ok)
+        toast.add({ title: 'Failed to fetch contracts', color: 'error' });
+      const data = await response.json();
+      contracts.value = data.map((contract: ContractDto) =>
+        toContract(contract),
+      );
+    }
+    catch (error) {
+      console.error('Error fetching contracts:', error);
+      toast.add({ title: 'Failed to fetch contracts', color: 'error' });
+    }
   }
 
-  function removeContract(contract: Contract) {
-    contracts.value = contracts.value.filter(c => c.id !== contract.id);
+  async function createContract(contract: CreateContract) {
+    try {
+      const response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contract),
+      });
+      if (!response.ok)
+        toast.add({ title: 'Failed to create contract', color: 'error' });
+      const newContract = await response.json();
+      contracts.value.push(toContract(newContract));
+    }
+    catch (error) {
+      console.error('Error creating contract:', error);
+      toast.add({ title: 'Failed to create contract', color: 'error' });
+    }
   }
 
-  return { createContract, editContract, groupedContracts, removeContract };
+  async function editContract(contractId: number, contract: CreateContract) {
+    try {
+      const response = await fetch(`${baseUrl}/${contractId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contract),
+      });
+      if (!response.ok)
+        toast.add({ title: 'Failed to update contract', color: 'error' });
+      const updatedContract = await response.json();
+      const index = contracts.value.findIndex(c => c.id === contractId);
+      if (index !== -1) {
+        contracts.value[index] = toContract(updatedContract);
+      }
+    }
+    catch (error) {
+      console.error('Error updating contract:', error);
+      toast.add({ title: 'Failed to update contract', color: 'error' });
+    }
+  }
+
+  async function removeContract(contract: Contract) {
+    try {
+      const response = await fetch(`${baseUrl}/${contract.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok)
+        toast.add({ title: 'Failed to delete contract', color: 'error' });
+      contracts.value = contracts.value.filter(c => c.id !== contract.id);
+    }
+    catch (error) {
+      console.error('Error deleting contract:', error);
+      toast.add({ title: 'Failed to delete contract', color: 'error' });
+    }
+  }
+
+  return {
+    contracts,
+    groupedContracts,
+    fetchContracts,
+    createContract,
+    editContract,
+    removeContract,
+  };
 });
 
 if (import.meta.hot) {

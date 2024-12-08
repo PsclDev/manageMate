@@ -6,6 +6,9 @@ useHead({
 });
 
 const modal = useModal();
+const { fetchContracts } = useContractStore();
+fetchContracts();
+
 const { groupedContracts } = storeToRefs(useContractStore());
 
 function openCreateContractModal() {

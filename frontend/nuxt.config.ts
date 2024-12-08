@@ -3,6 +3,11 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt', '@nuxt/eslint', '@vueuse/nuxt', '@nuxt/ui'],
   ssr: false,
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: '',
+    },
+  },
   compatibilityDate: '2024-04-03',
   eslint: {
     config: {

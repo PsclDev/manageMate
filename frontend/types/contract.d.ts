@@ -1,3 +1,11 @@
+declare interface ContractDto {
+  id: number;
+  title: string;
+  description?: string;
+  expiresAt: string;
+  lastTerminationDate: string;
+}
+
 declare interface Contract {
   id: number;
   title: string;
