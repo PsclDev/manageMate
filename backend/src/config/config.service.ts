@@ -23,6 +23,8 @@ const CONFIG_SCHEMA = z.object({
     password: z.string().min(1),
     database: z.string().min(1),
   }),
+
+  discordWebhookUrl: z.string()
 });
 
 @Injectable()
@@ -46,8 +48,10 @@ export class ConfigService {
     port: Number(process.env.APP_DB_PORT) || 5432,
     user: process.env.APP_DB_USER || '',
     password: process.env.APP_DB_PASSWORD || '',
-    database: process.env.APP_DB_NAME || 'skillevo',
+    database: process.env.APP_DB_NAME || 'manageMate',
   };
+
+  discordWebhookUrl = process.env.APP_DISCORD_WEBHOOK_URL;
 
   // ===
 

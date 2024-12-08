@@ -34,6 +34,34 @@ export class CreateContractTable1733663695352 implements MigrationInterface {
       }),
       true,
     );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'contract_notification',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          {
+            name: 'contractId',
+            type: 'int',
+          },
+          {
+            name: 'type',
+            type: 'varchar',
+          },
+          {
+            name: 'sentAt',
+            type: 'timestamp',
+          },
+        ],
+      }),
+      true,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

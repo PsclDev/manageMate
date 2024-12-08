@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity({name: 'contract'})
 export class ContractEntity {
@@ -16,4 +16,23 @@ export class ContractEntity {
 
   @Column()
   lastTerminationDate: Date;
+}
+
+@Entity({ name: 'contract_notification' })
+export class ContractNotificationEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  contractId: number;
+
+  @ManyToOne(() => ContractEntity)
+  @JoinColumn({ name: 'contractId' })
+  contract: ContractEntity;
+
+  @Column()
+  type: '4_weeks' | '2_weeks' | '1_day';
+
+  @Column()
+  sentAt: Date;
 }
