@@ -1,0 +1,29 @@
+{
+    "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+    "vcs": {
+      "enabled": false,
+      "clientKind": "git",
+      "useIgnoreFile": false
+    },
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2
+    },
+    "linter": {
+      "rules": {
+        "style": {
+          "useImportType": "off"
+        }
+      }
+    },
+    "javascript": {
+      "formatter": {
+        "quoteStyle": "single"
+      },
+      "parser": {
+        "unsafeParameterDecoratorsEnabled": true
+      }
+    }
+  }
+  
