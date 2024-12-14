@@ -1,0 +1,74 @@
+name: Push the app 🚀
+
+on:
+  push:
+    tags:
+      - 'v**'
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to registry 🔐
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.ACTOR }}
+          password: ${{ secrets.MANAGE_MATE_PAT }}
+
+      - name: Backend - Build and push image 🚀
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: './backend'
+          file: './backend/Dockerfile'
+          tags: ghcr.io/pscldev/manage-mate/backend:latest,ghcr.io/pscldev/manage-mate/backend:${{ github.ref_name }}
+
+      - name: Frontend - Build and push image 🚀
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: './frontend'
+          file: './frontend/Dockerfile'
+          tags: ghcr.io/pscldev/manage-mate/frontend:latest,ghcr.io/pscldev/manage-mate/frontend:${{ github.ref_name }}
+
+      - name: Trigger Discord Webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          SHORT_SHA=$(echo $COMMIT_SHA | cut -c1-7)
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          curl -H "Content-Type: application/json" \
+              -X POST \
+              -d '{
+                "tts": false,
+                "embeds": [
+                  {
+                    "title": "New Version: '$VERSION'",
+                    "color": 65390,
+                    "fields": [
+                      {
+                        "name": "Build Sha",
+                        "value": "'$SHORT_SHA'"
+                      },
+                      {
+                        "name": "Build Time",
+                        "value": "'$TIMESTAMP'"
+                      }
+                    ],
+                    "author": {
+                      "name": "'$GITHUB_REPOSITORY'"
+                    }
+                  }
+                ],
+                "username": "Pipeline Information",
+                "avatar_url": "https://avatars.githubusercontent.com/u/108695302"
+              }' $WEBHOOK_URL
