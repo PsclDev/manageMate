@@ -19,7 +19,7 @@ const CONFIG_SCHEMA = z.object({
   apiSecret: z.string().min(32),
 
   cors: z.object({
-    allowedOrigins: z.array(z.string()).default(['http://localhost:3000']),
+    allowedOrigins: z.string().default('http://localhost:3000'),
   }),
 
   database: z.object({
@@ -52,9 +52,7 @@ export class ConfigService {
   apiSecret = process.env.APP_API_SECRET;
 
   cors = {
-    allowedOrigins: (process.env.APP_CORS_ALLOWED_ORIGINS || 'http://localhost:3000')
-      .split(',')
-      .map((origin) => origin.trim()),
+    allowedOrigins: process.env.APP_CORS_ALLOWED_ORIGINS || 'http://localhost:3000'
   };
 
   database = {
