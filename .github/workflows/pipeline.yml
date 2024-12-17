@@ -53,7 +53,7 @@ jobs:
                 "embeds": [
                   {
                     "title": "New Version: '$VERSION'",
-                    "color": 65390,
+                    "color": 16021598,
                     "fields": [
                       {
                         "name": "Build Sha",
