@@ -1,4 +1,4 @@
-import { Module, type NestModule, type MiddlewareConsumer } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { ConfigModule } from "./config/config.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigService } from "./config";
@@ -30,10 +30,4 @@ import { HeaderMiddleware } from "./middleware/header.middleware";
 		}),
 	],
 })
-export class AppModule implements NestModule {
-	constructor(private readonly configService: ConfigService) {}
-
-	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(HeaderMiddleware).forRoutes("*");
-	}
-}
+export class AppModule {}
