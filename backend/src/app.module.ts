@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "./config/config.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigService } from "./config";
@@ -30,4 +30,10 @@ import { HeaderMiddleware } from "./middleware/header.middleware";
 		}),
 	],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(HeaderMiddleware)
+      .forRoutes('*');
+  }
+}

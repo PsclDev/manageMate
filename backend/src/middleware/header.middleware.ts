@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
-import type { ConfigService } from '../config';
+import { ConfigService } from '../config';
 
 @Injectable()
 export class HeaderMiddleware implements NestMiddleware {
