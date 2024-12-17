@@ -16,6 +16,8 @@ const CONFIG_SCHEMA = z.object({
     printConfig: z.boolean(),
   }),
 
+  apiSecret: z.string().min(32),
+
   database: z.object({
     host: z.string().min(1),
     port: z.number(),
@@ -42,6 +44,8 @@ export class ConfigService {
     port: Number(process.env.APP_PORT) || 3010,
     printConfig: this.toBool(process.env.APP_PRINT_CONFIG) || false,
   };
+
+  apiSecret = process.env.APP_API_SECRET;
 
   database = {
     host: process.env.APP_DB_HOST || '',

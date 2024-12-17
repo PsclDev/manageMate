@@ -8,6 +8,11 @@ export const useContractStore = defineStore('contractStore', () => {
   const baseUrl = `${config.public.apiBaseUrl}/contracts`;
   const contracts = ref<Contract[]>([]);
 
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'x-auth-api-key': String(config.public.apiKey),
+  };
+
   const groupedContracts = computed(() => {
     const groupedByYear = contracts.value.reduce(
       (acc, contract) => {
@@ -41,7 +46,9 @@ export const useContractStore = defineStore('contractStore', () => {
 
   async function fetchContracts() {
     try {
-      const response = await fetch(baseUrl);
+      const response = await fetch(baseUrl, {
+        headers: defaultHeaders,
+      });
       if (!response.ok)
         toast.add({ title: 'Failed to fetch contracts', color: 'error' });
       const data = await response.json();
@@ -59,9 +66,7 @@ export const useContractStore = defineStore('contractStore', () => {
     try {
       const response = await fetch(baseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: defaultHeaders,
         body: JSON.stringify(contract),
       });
       if (!response.ok)
@@ -79,9 +84,7 @@ export const useContractStore = defineStore('contractStore', () => {
     try {
       const response = await fetch(`${baseUrl}/${contractId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: defaultHeaders,
         body: JSON.stringify(contract),
       });
       if (!response.ok)
@@ -102,6 +105,7 @@ export const useContractStore = defineStore('contractStore', () => {
     try {
       const response = await fetch(`${baseUrl}/${contract.id}`, {
         method: 'DELETE',
+        headers: defaultHeaders,
       });
       if (!response.ok)
         toast.add({ title: 'Failed to delete contract', color: 'error' });
